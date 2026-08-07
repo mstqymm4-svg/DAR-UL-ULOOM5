@@ -1,0 +1,121 @@
+// Prisma schema — Dar Al Uloom standalone backend
+// SQLite database stored on this same application server.
+// No external database service is required. Keep /data on persistent server storage.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Admin (single local administrator account) ───────────────────────────
+model Admin {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  fullName     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ─── Books ──────────────────────────────────────────────────────────────
+model Book {
+  id          String   @id @default(uuid())
+  title       String
+  author      String
+  category    String
+  description String?
+  coverImage  String?
+  pagesCount  Int?
+  language    String   @default("العربية")
+  pdfUrl      String?
+  isFeatured  Boolean  @default(false)
+  rating      Float    @default(0)
+  status      String   @default("published") // published | draft | hidden
+  createdDate DateTime @default(now())
+  updatedDate DateTime @updatedAt
+}
+
+// ─── Video channels ────────────────────────────────────────────────────
+model VideoChannel {
+  id          String   @id @default(uuid())
+  name        String
+  channelLogo String?
+  description String?
+  youtubeUrl  String?
+  category    String   @default("عام")
+  sortOrder   Int      @default(0)
+  visible     Boolean  @default(true)
+  createdDate DateTime @default(now())
+  updatedDate DateTime @updatedAt
+}
+
+// ─── Videos ─────────────────────────────────────────────────────────────
+model Video {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  youtubeUrl  String?
+  videoUrl    String? // locally-uploaded video file path
+  channelId   String?
+  channelName String?
+  category    String   @default("عام")
+  thumbnail   String?
+  duration    String?
+  isFeatured  Boolean  @default(false)
+  visible     Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdDate DateTime @default(now())
+  updatedDate DateTime @updatedAt
+}
+
+// ─── Social channels (contact links shown across the app) ─────────────
+model SocialChannel {
+  id          String   @id @default(uuid())
+  name        String
+  channelType String // whatsapp | instagram | facebook | telegram | youtube | twitter | website | email | custom
+  url         String
+  iconUrl     String?
+  description String?
+  sortOrder   Int      @default(0)
+  visible     Boolean  @default(true)
+  createdDate DateTime @default(now())
+  updatedDate DateTime @updatedAt
+}
+
+// ─── Categories (managed lists used by Book/Video admin forms) ────────
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  type      String // "book" | "video"
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([name, type])
+}
+
+// ─── App settings (generic key/value store used by the Dev panel) ─────
+model AppSetting {
+  id            String   @id @default(uuid())
+  settingKey    String   @unique
+  settingValue  String?
+  settingType   String   @default("text") // color | font | text | boolean | url | json
+  changedBy     String?
+  previousValue String?
+  description   String?
+  updatedAt     DateTime @updatedAt
+}
+
+// ─── Contact messages (replaces Base44 SendEmail integration) ─────────
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

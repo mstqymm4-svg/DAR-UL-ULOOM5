@@ -1,0 +1,55 @@
+# Render Blueprint — deploys Dar Al Uloom as a single always-on web service
+# (serves both the React frontend and the Express API from one process) plus
+# a managed PostgreSQL database. Once deployed, the app runs 24/7 on Render's
+# servers — your laptop does not need to be on or connected at all.
+#
+# How to use:
+#   1. Push this project to a GitHub/GitLab repo.
+#   2. On Render: New -> Blueprint -> select the repo. Render reads this file
+#      and creates both resources below automatically.
+#   3. Render will ask you to set DEFAULT_ADMIN_PASSWORD and JWT_SECRET
+#      (marked sync: false below) — enter your own values, don't use the
+#      example ones.
+#   4. Wait for the first deploy to finish, then log in at
+#      https://<your-service>.onrender.com/login with the admin account you
+#      configured.
+
+databases:
+  - name: dar-al-uloom-db
+    plan: free # upgrade for production traffic / backups
+    databaseName: dar_al_uloom
+    user: dar_al_uloom
+
+services:
+  - type: web
+    name: dar-al-uloom
+    runtime: node
+    plan: free # upgrade to a paid plan for an always-warm instance + persistent disk
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dar-al-uloom-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: DEFAULT_ADMIN_USERNAME
+        value: admin
+      - key: DEFAULT_ADMIN_PASSWORD
+        sync: false # set your own strong password in the Render dashboard
+      - key: MAX_UPLOAD_MB
+        value: "500"
+      - key: CLIENT_ORIGIN
+        value: "" # same-origin deploy — frontend & API share one domain
+    disk:
+      # Persistent disk so uploaded PDFs/covers/videos survive restarts and
+      # redeploys. Requires a paid plan (Render's free web services do not
+      # support persistent disks — uploads would be wiped on every redeploy).
+      name: dar-al-uloom-uploads
+      mountPath: /opt/render/project/src/server/uploads
+      sizeGB: 10

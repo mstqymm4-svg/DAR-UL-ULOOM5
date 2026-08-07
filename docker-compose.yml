@@ -1,0 +1,19 @@
+services:
+  dar-ul-uloom:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: "file:../../data/darul.sqlite"
+      PORT: "4000"
+      JWT_SECRET: "CHANGE_THIS_TO_A_LONG_RANDOM_SECRET"
+      DEFAULT_ADMIN_USERNAME: "admin"
+      DEFAULT_ADMIN_PASSWORD: "CHANGE_THIS_PASSWORD"
+      MAX_UPLOAD_MB: "500"
+    volumes:
+      - darul_data:/app/data
+      - darul_uploads:/app/server/uploads
+volumes:
+  darul_data:
+  darul_uploads:
