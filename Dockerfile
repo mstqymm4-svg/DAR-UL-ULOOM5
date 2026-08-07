@@ -1,7 +1,6 @@
 FROM node:20-slim
 WORKDIR /app
 
-ENV NODE_ENV=production
 ENV PORT=4000
 ENV DATABASE_URL=file:../../data/darul.sqlite
 
@@ -18,6 +17,8 @@ RUN npm ci
 
 COPY . .
 RUN npm run build
+
+ENV NODE_ENV=production
 
 VOLUME ["/app/data", "/app/server/uploads"]
 EXPOSE 4000
