@@ -1,0 +1,32 @@
+# Dependencies / build artifacts
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+!server/.env.example
+
+# Local data (never in the image)
+data
+server/prisma/*.db
+server/prisma/*.db-journal
+server/uploads/*
+
+# VCS
+.git
+.gitignore
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+*.log
+logs
+
+# Misc
+*.tsbuildinfo
+npm-debug.log*
