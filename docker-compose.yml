@@ -1,19 +1,49 @@
+# Docker Compose — full stack (PostgreSQL + app) for local/self-hosted runs.
+#
+# Copy the root `.env.example` to `.env` and set POSTGRES_PASSWORD and
+# JWT_SECRET to your own strong values (the compose defaults below are NOT for
+# real deployments). Then:  docker compose up --build
+#
+# The web app talks to the database through the `db` service name; the
+# DATABASE_URL here uses the Postgres provider (schema.prisma), matching
+# production. Migrations are applied automatically on boot via start:prod.
 services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dar_al_uloom
+      POSTGRES_USER: dar_al_uloom
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_in_.env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dar_al_uloom -d dar_al_uloom"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   dar-ul-uloom:
     build: .
     restart: unless-stopped
     ports:
       - "4000:4000"
     environment:
-      DATABASE_URL: "file:../../data/darul.sqlite"
+      DATABASE_URL: "postgresql://dar_al_uloom:${POSTGRES_PASSWORD:-change_this_in_.env}@db:5432/dar_al_uloom"
+      NODE_ENV: "production"
       PORT: "4000"
-      JWT_SECRET: "CHANGE_THIS_TO_A_LONG_RANDOM_SECRET"
+      JWT_SECRET: "${JWT_SECRET:-change_this_in_.env}"
       DEFAULT_ADMIN_USERNAME: "admin"
-      DEFAULT_ADMIN_PASSWORD: "CHANGE_THIS_PASSWORD"
+      DEFAULT_ADMIN_PASSWORD: "${DEFAULT_ADMIN_PASSWORD:-change_this_in_.env}"
       MAX_UPLOAD_MB: "500"
+    depends_on:
+      db:
+        condition: service_healthy
     volumes:
       - darul_data:/app/data
       - darul_uploads:/app/server/uploads
+
 volumes:
+  pgdata:
   darul_data:
   darul_uploads:

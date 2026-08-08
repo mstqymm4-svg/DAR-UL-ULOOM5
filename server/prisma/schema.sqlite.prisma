@@ -1,13 +1,15 @@
-// Prisma schema — Dar Al Uloom backend (PRODUCTION: PostgreSQL)
+// Prisma schema — Dar Al Uloom backend (LOCAL DEVELOPMENT: SQLite)
 //
-// Used by Render and any other production deployment. The datasource reads
-// DATABASE_URL from the environment (Render provides it from the managed
-// PostgreSQL database). Migrations live in ./migrations and are applied
-// with `prisma migrate deploy`.
+// This schema is a development convenience: it lets the app run locally
+// with a zero-setup SQLite database (data/darul.sqlite) exactly like before.
+// It is NOT used in production. Keep the models IDENTICAL to schema.prisma
+// (the PostgreSQL production schema). Only the datasource block differs.
 //
-// For local development a matching SQLite schema is provided in
-// ./schema.sqlite.prisma (see package.json scripts db:prepare / predev).
-// Keep the two files' models identical.
+// Commands that use it:
+//   npm run postinstall   -> prisma generate --schema=server/prisma/schema.sqlite.prisma
+//   npm run db:prepare    -> prisma db push    --schema=server/prisma/schema.sqlite.prisma
+//
+// Production uses server/prisma/schema.prisma + server/prisma/migrations.
 
 generator client {
   provider = "prisma-client-js"
@@ -15,7 +17,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 

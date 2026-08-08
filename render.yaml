@@ -44,6 +44,8 @@ services:
         sync: false # set your own strong password in the Render dashboard
       - key: MAX_UPLOAD_MB
         value: "500"
+      - key: UPLOADS_DIR
+        value: "server/uploads" # resolved against the project root; must match the disk mountPath
       - key: CLIENT_ORIGIN
         value: "" # same-origin deploy — frontend & API share one domain
     disk:

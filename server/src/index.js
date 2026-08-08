@@ -19,12 +19,35 @@ import uploadRoutes from './routes/upload.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || true, credentials: true }));
+// CORS — strict allowlist. The frontend and API are served from the SAME
+// origin (Express serves the built React app in production, Vite proxies the
+// API in development), so cross-origin browser access is NOT needed. When
+// CLIENT_ORIGIN is set (comma-separated list) only those origins are allowed;
+// otherwise cross-origin requests are rejected by the browser (no CORS
+// headers). Native/mobile clients are unaffected by CORS.
+const allowedOrigins = (process.env.CLIENT_ORIGIN || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: allowedOrigins.length > 0
+    ? (origin, cb) => {
+        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+        const err = new Error('Not allowed by CORS');
+        err.status = 403;
+        return cb(err);
+      }
+    : false,
+  credentials: true,
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Static file serving for uploaded books/videos/covers/thumbnails/images
-app.use('/uploads', express.static(UPLOADS_ROOT));
+// Static file serving for uploaded books/videos/covers/thumbnails/images.
+// express.static handles correct Content-Type, Range (206) and conditional
+// requests, which the PDF.js reader relies on.
+app.use('/uploads', express.static(UPLOADS_ROOT, { index: false }));
 
 // ─── API routes ─────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
@@ -56,8 +79,16 @@ app.use((err, req, res, _next) => {
   if (err?.code === 'LIMIT_FILE_SIZE') {
     return res.status(413).json({ error: 'file_too_large', message: 'حجم الملف أكبر من الحد المسموح' });
   }
-  res.status(err.status || 500).json({ error: 'server_error', message: err.message || 'حدث خطأ في الخادم' });
+  const status = err.status
+    || (['INVALID_FILE_TYPE', 'INVALID_FILE_CONTENT'].includes(err?.code) ? 400 : 500);
+  res.status(status).json({ error: err?.code || 'server_error', message: err.message || 'حدث خطأ في الخادم' });
 });
+
+// Fail fast: never boot in production without a signing secret. The server
+// also refuses to start when it cannot reach a database (see lib/db.js).
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET must be set when NODE_ENV=production');
+}
 
 // IMPORTANT: bind to 0.0.0.0, not just "localhost" — cloud hosts like Render
 // route external traffic to 0.0.0.0. process.env.PORT is provided by the

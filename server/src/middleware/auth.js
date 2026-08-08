@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 
+// In production a real JWT_SECRET must be provided via the environment
+// (fail-fast, see index.js). The dev fallback is ONLY for local development.
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
 export function signAdminToken(admin) {
