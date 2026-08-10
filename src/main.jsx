@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client'
 import App from '@/App.jsx'
 import '@/index.css'
 import { migrateLegacySettings } from '@/lib/settingsStore'
+import { setupNativeApp } from '@/lib/nativeBridge'
+
+// Wire up native shell (back button, status bar, splash) on the packaged app
+setupNativeApp();
 
 // Migrate old dev_* localStorage keys to new system
 migrateLegacySettings();

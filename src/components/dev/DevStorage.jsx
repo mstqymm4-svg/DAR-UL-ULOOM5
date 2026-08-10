@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Entities } from "@/api/entities";
-import { UploadFile } from "@/api/integrations";
-import { Auth } from "@/api/auth";
 import { HardDrive, BookOpen, Image, FileText, RefreshCw } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 export default function DevStorage() {
   const [books, setBooks] = useState([]);
@@ -88,7 +87,7 @@ export default function DevStorage() {
             {incomplete.map(book => (
               <div key={book.id} className="flex items-center gap-3 px-4 py-2.5">
                 <div className="w-8 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0">
-                  {book.cover_image ? <img src={book.cover_image} alt="" className="w-full h-full object-cover" /> : <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />}
+                  {book.cover_image ? <img src={resolveMediaUrl(book.cover_image)} alt="" className="w-full h-full object-cover" /> : <BookOpen className="w-3.5 h-3.5 text-muted-foreground" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold truncate">{book.title}</p>

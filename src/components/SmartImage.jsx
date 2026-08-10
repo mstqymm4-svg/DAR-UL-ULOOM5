@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getCachedImageBlobUrl } from "@/lib/offlineDB";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 /**
  * SmartImage — displays images with offline support.
@@ -9,21 +10,22 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
  * Falls back to fallback element if image fails to load.
  */
 export default function SmartImage({ src, alt = "", className = "", fallback: Fallback = null, ...props }) {
-  const [imgSrc, setImgSrc] = useState(src);
+  const resolvedSrc = resolveMediaUrl(src);
+  const [imgSrc, setImgSrc] = useState(resolvedSrc);
   const [failed, setFailed] = useState(false);
   const { isOnline } = useOnlineStatus();
 
   useEffect(() => {
-    setImgSrc(src);
+    setImgSrc(resolvedSrc);
     setFailed(false);
 
     // If offline, try to get cached version
-    if (!isOnline && src) {
-      getCachedImageBlobUrl(src).then((blobUrl) => {
+    if (!isOnline && resolvedSrc) {
+      getCachedImageBlobUrl(resolvedSrc).then((blobUrl) => {
         if (blobUrl) setImgSrc(blobUrl);
       });
     }
-  }, [src, isOnline]);
+  }, [resolvedSrc, isOnline]);
 
   if (failed || !imgSrc) {
     return Fallback ? <Fallback /> : null;

@@ -168,3 +168,51 @@ render.yaml              إعداد النشر التلقائي على Render (W
   category/description) — لا يتصل بأي LLM أو خدمة خارجية.
 - **ترجمة واجهة التطبيق** (i18n بين العربية/الإنجليزية/الفرنسية...) نصوص
   ثابتة محلية بالكامل ولا علاقة لها بالذكاء الاصطناعي.
+
+## تطبيق أندرويد (Capacitor)
+
+النسخة الأصلية من المشروع (مشروع Vite + Express) هي نفسها التي تُبنى منها
+تطبيق أندرويد الحقيقي عبر **Capacitor** — لا يوجد WebView يحمّل موقعاً من
+الإنترنت، بل التطبيق الكامل معبأ داخل ملف الـ APK ويعمل **بدون إنترنت**:
+
+- الكتب وملفات PDF والمفضلة والإعدادات تُخزَّن على الجهاز (IndexedDB).
+- عند توفر شبكة، يُزامن التطبيق مع السيرفر تلقائياً (نفس محرك المزامنة في الويب).
+- زر الرجوع يعمل بشكل طبيعي (تراجع داخل التطبيق ثم خروج).
+- لا يوجد أي شاشة "أدخل عنوان السيرفر" — العنوان يُثبَّت وقت البناء.
+
+### بناء APK
+
+```bash
+npm install
+npm run db:prepare            # إنشاء قاعدة البيانات المحلية SQLite
+npm run build                 # بناء نسخة الويب (dist/)
+
+# (أول مرة فقط) إضافة منصة أندرويد
+npx cap init "Dar-ul-Uloom" com.example.darululoom --web-dir dist
+npx cap add android
+
+# البناء
+npm run build:android
+npx cap sync android
+cd android
+JAVA_HOME=/opt/android-studio/jbr ./gradlew assembleDebug
+# الناتج: android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### ربط السيرفر للمزامنة عبر الإنترنت
+
+التطبيق لا يعرض أي حقل لإدخال العنوان أثناء التشغيل — العنوان يُضبط مرة واحدة
+قبل البناء في ملف `.env.android` (نموذج: `.env.android.example`):
+
+```bash
+cp .env.android.example .env.android
+# ثم اكتب في الملف:
+VITE_API_BASE=https://your-server.onrender.com
+
+npm run build:android
+npx cap sync android
+cd android && ./gradlew assembleDebug
+```
+
+بدون تعيين `VITE_API_BASE` يعمل التطبيق **أوفلاين بالكامل** (الكتب/PDF
+التي سبق مزامنتها تبقى متاحة)، وتُفعَّل المزامنة فور تعيين الرابط وإعادة البناء.

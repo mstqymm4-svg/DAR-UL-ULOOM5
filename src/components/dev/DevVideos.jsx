@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Entities } from "@/api/entities";
 import { UploadFile } from "@/api/integrations";
-import { Auth } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, Upload, Save, Youtube, Star, StarOff,
   Video, Tv,
@@ -116,7 +116,7 @@ function ChannelsTab() {
           <div>
             <Label className="text-xs">شعار القناة</Label>
             <div className="flex items-center gap-2">
-              {form.channel_logo && <img src={form.channel_logo} alt="logo" className="w-10 h-10 rounded-lg object-cover border border-border" />}
+              {form.channel_logo && <img src={resolveMediaUrl(form.channel_logo)} alt="logo" className="w-10 h-10 rounded-lg object-cover border border-border" />}
               <label className="cursor-pointer flex-1">
                 <input type="file" accept="image/*" onChange={handleUploadLogo} className="hidden" />
                 <div className="flex items-center justify-center gap-2 h-9 rounded-lg border-2 border-dashed border-border hover:border-primary/50 text-xs text-muted-foreground">
@@ -158,7 +158,7 @@ function ChannelsTab() {
             <div key={ch.id} className={`flex items-center gap-3 bg-card border border-border rounded-xl p-3 ${!ch.visible ? "opacity-50" : ""}`}>
               <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
                 {ch.channel_logo
-                  ? <img src={ch.channel_logo} alt={ch.name} className="w-full h-full rounded-lg object-cover" />
+                  ? <img src={resolveMediaUrl(ch.channel_logo)} alt={ch.name} className="w-full h-full rounded-lg object-cover" />
                   : <Tv className="w-5 h-5 text-red-500" />}
               </div>
               <div className="flex-1 min-w-0">
@@ -323,7 +323,7 @@ function VideosTab() {
           {filtered.map((v) => (
             <div key={v.id} className={`bg-card border border-border rounded-xl p-3 ${!v.visible ? "opacity-50" : ""}`}>
               <div className="flex gap-3">
-                {v.thumbnail && <img src={v.thumbnail} alt={v.title} className="w-24 h-16 rounded-lg object-cover shrink-0" />}
+                {v.thumbnail && <img src={resolveMediaUrl(v.thumbnail)} alt={v.title} className="w-24 h-16 rounded-lg object-cover shrink-0" />}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold truncate">{v.title}</p>
                   <p className="text-xs text-muted-foreground truncate">{v.channel_name || "بدون قناة"}</p>

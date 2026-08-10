@@ -12,6 +12,7 @@
 import { Entities } from "@/api/entities";
 import * as db from "@/lib/offlineDB";
 import { getSetting } from "@/lib/settingsStore";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 // ─── Online status ────────────────────────────────────────────────────────────
 export function isOnline() {
@@ -57,13 +58,14 @@ export async function syncBooks(onProgress) {
   let imagesCached = 0;
   for (const book of allBooks) {
     if (!book.cover_image) continue;
-    const existing = await db.getCachedImage(book.cover_image);
+    const coverUrl = resolveMediaUrl(book.cover_image);
+    const existing = await db.getCachedImage(coverUrl);
     if (!existing) {
       try {
-        const res = await fetch(book.cover_image);
+        const res = await fetch(coverUrl);
         if (res.ok) {
           const blob = await res.blob();
-          await db.cacheImage(book.cover_image, blob);
+          await db.cacheImage(coverUrl, blob);
           imagesCached++;
           onProgress?.({ imagesCached, total: allBooks.length });
         }
@@ -85,11 +87,13 @@ export async function syncBooks(onProgress) {
 export async function downloadBookPdf(book, onProgress) {
   if (!book.pdf_url) throw new Error("لا يوجد ملف PDF لهذا الكتاب");
 
+  const pdfUrl = resolveMediaUrl(book.pdf_url);
+
   // Check if already downloaded
-  const existing = await db.getCachedPdf(book.pdf_url);
+  const existing = await db.getCachedPdf(pdfUrl);
   if (existing) return { alreadyCached: true, size: existing.size };
 
-  const res = await fetch(book.pdf_url);
+  const res = await fetch(pdfUrl);
   if (!res.ok) throw new Error("فشل تنزيل الملف");
 
   const reader = res.body?.getReader();
@@ -108,11 +112,11 @@ export async function downloadBookPdf(book, onProgress) {
     const buffer = new Uint8Array(received);
     let pos = 0;
     for (const chunk of chunks) { buffer.set(chunk, pos); pos += chunk.length; }
-    await db.cachePdf(book.pdf_url, buffer.buffer, book.id, book.title);
+    await db.cachePdf(pdfUrl, buffer.buffer, book.id, book.title);
   } else {
     // Fallback: no streaming support
     const buffer = await res.arrayBuffer();
-    await db.cachePdf(book.pdf_url, buffer, book.id, book.title);
+    await db.cachePdf(pdfUrl, buffer, book.id, book.title);
     onProgress?.({ received: buffer.byteLength, total: buffer.byteLength, percent: 100 });
   }
 
@@ -145,13 +149,14 @@ export async function syncVideos(onProgress) {
   // Cache thumbnails
   for (const v of visibleVideos) {
     if (!v.thumbnail) continue;
-    const existing = await db.getCachedImage(v.thumbnail);
+    const thumbUrl = resolveMediaUrl(v.thumbnail);
+    const existing = await db.getCachedImage(thumbUrl);
     if (!existing) {
       try {
-        const res = await fetch(v.thumbnail);
+        const res = await fetch(thumbUrl);
         if (res.ok) {
           const blob = await res.blob();
-          await db.cacheImage(v.thumbnail, blob);
+          await db.cacheImage(thumbUrl, blob);
         }
       } catch(e) {}
     }
@@ -187,13 +192,14 @@ export async function syncVideoChannels(onProgress) {
   // Cache channel logos
   for (const c of visibleChannels) {
     if (!c.channel_logo) continue;
-    const existing = await db.getCachedImage(c.channel_logo);
+    const logoUrl = resolveMediaUrl(c.channel_logo);
+    const existing = await db.getCachedImage(logoUrl);
     if (!existing) {
       try {
-        const res = await fetch(c.channel_logo);
+        const res = await fetch(logoUrl);
         if (res.ok) {
           const blob = await res.blob();
-          await db.cacheImage(c.channel_logo, blob);
+          await db.cacheImage(logoUrl, blob);
         }
       } catch(e) {}
     }
@@ -229,13 +235,14 @@ export async function syncSocialChannels() {
   // Cache icons
   for (const c of visibleChannels) {
     if (!c.icon_url) continue;
-    const existing = await db.getCachedImage(c.icon_url);
+    const iconUrl = resolveMediaUrl(c.icon_url);
+    const existing = await db.getCachedImage(iconUrl);
     if (!existing) {
       try {
-        const res = await fetch(c.icon_url);
+        const res = await fetch(iconUrl);
         if (res.ok) {
           const blob = await res.blob();
-          await db.cacheImage(c.icon_url, blob);
+          await db.cacheImage(iconUrl, blob);
         }
       } catch(e) {}
     }
@@ -291,10 +298,11 @@ export async function getSettingValue(key) {
  * Get an image URL — returns blob URL if cached offline, or original URL if online.
  */
 export async function getImageUrl(originalUrl) {
-  if (!originalUrl) return null;
-  const cached = await db.getCachedImage(originalUrl);
+  const resolved = resolveMediaUrl(originalUrl);
+  if (!resolved) return null;
+  const cached = await db.getCachedImage(resolved);
   if (cached) return URL.createObjectURL(cached.blob);
-  return originalUrl;
+  return resolved;
 }
 
 // ─── Check for updates ────────────────────────────────────────────────────────
@@ -420,7 +428,7 @@ export async function toggleFavorite(bookId) {
  * Check if a PDF is downloaded for offline reading.
  */
 export async function isPdfDownloaded(pdfUrl) {
-  const cached = await db.getCachedPdf(pdfUrl);
+  const cached = await db.getCachedPdf(resolveMediaUrl(pdfUrl));
   return !!cached;
 }
 

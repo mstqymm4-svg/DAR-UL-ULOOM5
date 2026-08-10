@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import { Entities } from "@/api/entities";
 import { UploadFile } from "@/api/integrations";
-import { Auth } from "@/api/auth";
 import { Image, Upload, Check, BookOpen, Youtube, ExternalLink, Sparkles, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { getSetting, setSettings, setSetting, subscribeToSettings } from "@/lib/settingsStore";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 export default function DevBranding() {
   const [logoUrl, setLogoUrl]       = useState(() => getSetting("logo_url"));
@@ -55,7 +54,7 @@ export default function DevBranding() {
         <h3 className="font-bold text-sm mb-4 flex items-center gap-2"><Eye className="w-4 h-4 text-primary" /> معاينة الهيدر</h3>
         <div className="bg-background border border-border rounded-xl p-4 flex items-center gap-3 shadow-sm">
           <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center overflow-hidden shrink-0">
-            {logoUrl ? <img src={logoUrl} alt="logo" className="w-full h-full object-cover" /> : <BookOpen className="w-6 h-6 text-primary-foreground" />}
+            {logoUrl ? <img src={resolveMediaUrl(logoUrl)} alt="logo" className="w-full h-full object-cover" /> : <BookOpen className="w-6 h-6 text-primary-foreground" />}
           </div>
           <div>
             <p className="font-bold text-base leading-tight">{appName}</p>
@@ -69,7 +68,7 @@ export default function DevBranding() {
         <h3 className="font-bold text-sm flex items-center gap-2"><Image className="w-4 h-4 text-primary" /> الشعار</h3>
         <div className="flex gap-4 items-start">
           <div className="w-20 h-20 rounded-2xl border-2 border-border bg-muted flex items-center justify-center overflow-hidden shrink-0">
-            {logoUrl ? <img src={logoUrl} alt="logo" className="w-full h-full object-cover" /> : <BookOpen className="w-8 h-8 text-muted-foreground" />}
+            {logoUrl ? <img src={resolveMediaUrl(logoUrl)} alt="logo" className="w-full h-full object-cover" /> : <BookOpen className="w-8 h-8 text-muted-foreground" />}
           </div>
           <div className="flex-1 space-y-2">
             <label className="cursor-pointer block">

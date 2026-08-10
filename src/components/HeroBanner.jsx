@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
 import { useT } from "@/lib/i18n";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 // ── Canvas-based animated backgrounds ─────────────────────────────────────────
 function ParticlesCanvas({ color1, color2, speed }) {
@@ -279,7 +280,7 @@ export default function HeroBanner() {
     const { bgType, bgUrl, gradFrom, gradTo, animSpeed } = s;
     if (bgType === "static_image" || bgType === "animated_gif") {
       return bgUrl ?
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${bgUrl})`, ...bgFilterStyle }} /> :
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${resolveMediaUrl(bgUrl)})`, ...bgFilterStyle }} /> :
 
       <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }} />;
 
@@ -288,14 +289,14 @@ export default function HeroBanner() {
       return bgUrl ?
       <video className="absolute inset-0 w-full h-full object-cover" style={bgFilterStyle}
       autoPlay={s.videoAutoplay} loop={s.videoLoop} muted={s.videoMute} playsInline>
-          <source src={bgUrl} type={bgType === "video_mp4" ? "video/mp4" : "video/webm"} />
+          <source src={resolveMediaUrl(bgUrl)} type={bgType === "video_mp4" ? "video/mp4" : "video/webm"} />
         </video> :
 
       <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }} />;
 
     }
     if (bgType === "slideshow") {
-      return <SlideshowBg urls={s.slideUrls} transition={s.slideTransition}
+      return <SlideshowBg urls={s.slideUrls.map((u) => resolveMediaUrl(u))} transition={s.slideTransition}
       duration={s.slideDuration} blur={s.blur} brightness={s.brightness} />;
     }
     if (bgType === "lottie") {

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Entities } from "@/api/entities";
 import { UploadFile } from "@/api/integrations";
-import { Auth } from "@/api/auth";
 import { BookPlus, Pencil, Trash2, Upload, Check, Search, RefreshCw, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { getSetting } from "@/lib/settingsStore";
 import { deleteCachedBook } from "@/lib/offlineDB";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 
 const DEFAULT_CATS = ["القرآن وعلومه","الحديث الشريف","الفقه الإسلامي","السيرة النبوية","العقيدة","التزكية والرقائق","التاريخ الإسلامي","أخرى"];
@@ -179,7 +179,7 @@ export default function DevBooks() {
                 <div key={book.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
                   <input type="checkbox" checked={selected.includes(book.id)} onChange={() => toggleSelect(book.id)} className="rounded shrink-0" />
                   <div className="w-9 h-11 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0 border border-border">
-                    {book.cover_image ? <img src={book.cover_image} alt="" className="w-full h-full object-cover" /> : <BookOpen className="w-4 h-4 text-muted-foreground" />}
+                    {book.cover_image ? <img src={resolveMediaUrl(book.cover_image)} alt="" className="w-full h-full object-cover" /> : <BookOpen className="w-4 h-4 text-muted-foreground" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold truncate">{book.title}</p>
@@ -233,7 +233,7 @@ export default function DevBooks() {
                 <div className="flex items-center gap-3 mt-1">
                   <div className="w-12 h-16 rounded-lg bg-muted border border-border overflow-hidden flex items-center justify-center shrink-0">
                     {form.cover_image
-                      ? <img src={form.cover_image} alt="غلاف" className="w-full h-full object-cover" />
+                      ? <img src={resolveMediaUrl(form.cover_image)} alt="غلاف" className="w-full h-full object-cover" />
                       : <BookOpen className="w-4 h-4 text-muted-foreground" />}
                   </div>
                   <label className="cursor-pointer flex-1">

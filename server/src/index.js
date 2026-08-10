@@ -21,24 +21,28 @@ const app = express();
 
 // CORS — strict allowlist. The frontend and API are served from the SAME
 // origin (Express serves the built React app in production, Vite proxies the
-// API in development), so cross-origin browser access is NOT needed. When
-// CLIENT_ORIGIN is set (comma-separated list) only those origins are allowed;
-// otherwise cross-origin requests are rejected by the browser (no CORS
-// headers). Native/mobile clients are unaffected by CORS.
-const allowedOrigins = (process.env.CLIENT_ORIGIN || '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
+// API in development), so cross-origin browser access is NOT needed. The
+// Capacitor Android app is packaged, but its WebView makes requests from the
+// origin https://localhost (Capacitor's local scheme), so that origin is
+// always allowed — a remote website cannot spoof it (the browser sets Origin
+// from the actual document). CLIENT_ORIGIN (comma-separated) adds further
+// origins for web deployments.
+const CAPACITOR_ORIGINS = ['https://localhost', 'http://localhost'];
+const allowedOrigins = [
+  ...CAPACITOR_ORIGINS,
+  ...(process.env.CLIENT_ORIGIN || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+];
 
 app.use(cors({
-  origin: allowedOrigins.length > 0
-    ? (origin, cb) => {
-        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-        const err = new Error('Not allowed by CORS');
-        err.status = 403;
-        return cb(err);
-      }
-    : false,
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    const err = new Error('Not allowed by CORS');
+    err.status = 403;
+    return cb(err);
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));

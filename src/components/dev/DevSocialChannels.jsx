@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Entities } from "@/api/entities";
 import { UploadFile } from "@/api/integrations";
-import { Auth } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +13,7 @@ import {
   Instagram, Facebook, Youtube, Globe, Mail, Link as LinkIcon,
 } from "lucide-react";
 import { WhatsAppIcon, TelegramIcon, XIcon } from "@/components/BrandIcons";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 const CHANNEL_TYPES = [
   { value: "whatsapp",   label: "واتساب",   icon: WhatsAppIcon,  color: "text-green-500", bg: "bg-green-500/10" },
@@ -151,7 +151,7 @@ export default function DevSocialChannels() {
           <div>
             <Label className="text-xs">صورة/أيقونة القناة</Label>
             <div className="flex items-center gap-2">
-              {form.icon_url && <img src={form.icon_url} alt="icon" className="w-10 h-10 rounded-lg object-cover border border-border" />}
+              {form.icon_url && <img src={resolveMediaUrl(form.icon_url)} alt="icon" className="w-10 h-10 rounded-lg object-cover border border-border" />}
               <label className="cursor-pointer flex-1">
                 <input type="file" accept="image/*" onChange={handleUploadIcon} className="hidden" />
                 <div className="flex items-center justify-center gap-2 h-9 rounded-lg border-2 border-dashed border-border hover:border-primary/50 text-xs text-muted-foreground">
@@ -199,7 +199,7 @@ export default function DevSocialChannels() {
                 </div>
                 <div className={`w-10 h-10 rounded-lg ${typeInfo.bg} flex items-center justify-center shrink-0`}>
                   {ch.icon_url
-                    ? <img src={ch.icon_url} alt={ch.name} className="w-full h-full rounded-lg object-cover" />
+                    ? <img src={resolveMediaUrl(ch.icon_url)} alt={ch.name} className="w-full h-full rounded-lg object-cover" />
                     : <Icon className={`w-5 h-5 ${typeInfo.color}`} />}
                 </div>
                 <div className="flex-1 min-w-0">

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Auth } from "@/api/auth";
 import { useT } from "@/lib/i18n";
 import { getSetting, subscribeToSettings } from "@/lib/settingsStore";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 export default function Layout() {
   const location = useLocation();
@@ -61,7 +62,7 @@ export default function Layout() {
             <Link to="/" className="flex items-center gap-3 group">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all">
                 {logoUrl ?
-                <img src={logoUrl} alt="logo" className="w-full h-full object-cover" /> :
+                <img src={resolveMediaUrl(logoUrl)} alt="logo" className="w-full h-full object-cover" /> :
                 <BookOpen className="w-5 h-5 text-primary-foreground" />}
               </div>
               <div>

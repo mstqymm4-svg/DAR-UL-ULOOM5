@@ -9,6 +9,8 @@
     "dev:server": "node server/src/index.js",
     "predev": "npm run storage:prepare && npm run db:prepare",
     "build": "vite build",
+    "build:android": "vite build --mode android",
+    "cap:sync": "cap sync android",
     "start": "npm run start:prod",
     "start:prod": "npm run storage:prepare && prisma generate --schema=server/prisma/schema.prisma && prisma migrate deploy --schema=server/prisma/schema.prisma && node server/prisma/seed.js && node server/src/index.js",
     "lint": "eslint . --quiet",
@@ -28,6 +30,13 @@
     "storage:prepare": "node server/scripts/prepare-storage.js"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.3",
     "@hello-pangea/dnd": "^17.0.0",
     "@hookform/resolvers": "^4.1.2",
     "@prisma/client": "^5.22.0",
@@ -99,6 +108,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@eslint/js": "^9.19.0",
     "@types/node": "^22.13.5",
     "@types/react": "^18.2.66",
@@ -118,5 +128,8 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.2",
     "vite": "^6.1.0"
+  },
+  "allowScripts": {
+    "sharp@0.32.6": true
   }
 }

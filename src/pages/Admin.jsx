@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Entities } from "@/api/entities";
 import { UploadFile } from "@/api/integrations";
-import { Auth } from "@/api/auth";
-import { Plus, Pencil, Trash2, BookOpen, X, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 import { toast } from "sonner";
 
 const categoryOptions = [
@@ -163,7 +163,7 @@ export default function Admin() {
               <div key={book.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
                 <div className="w-12 h-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0">
                   {book.cover_image ? (
-                    <img src={book.cover_image} alt="" className="w-full h-full object-cover" />
+                    <img src={resolveMediaUrl(book.cover_image)} alt="" className="w-full h-full object-cover" />
                   ) : (
                     <BookOpen className="w-5 h-5 text-muted-foreground" />
                   )}

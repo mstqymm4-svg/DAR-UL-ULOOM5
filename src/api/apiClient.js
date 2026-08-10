@@ -4,6 +4,8 @@
 // no API keys, no cloud dependency of any kind.
 // ─────────────────────────────────────────────────────────────────────────
 
+import { API_BASE } from '@/lib/mediaUrl';
+
 const TOKEN_KEY = 'dau_admin_token';
 
 export function getToken() {
@@ -37,7 +39,7 @@ async function request(path, { method = 'GET', body, headers = {}, isForm = fals
   if (!isForm) finalHeaders['Content-Type'] = 'application/json';
   if (token) finalHeaders['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE}/api${path}`, {
     method,
     headers: finalHeaders,
     body: isForm ? body : body !== undefined ? JSON.stringify(body) : undefined,

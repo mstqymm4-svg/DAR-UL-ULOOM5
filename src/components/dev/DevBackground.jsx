@@ -11,10 +11,9 @@ import {
   Settings, Eye, RotateCcw
 } from "lucide-react";
 import { getSetting, setSettings } from "@/lib/settingsStore";
-import { Entities } from "@/api/entities";
 import { UploadFile } from "@/api/integrations";
-import { Auth } from "@/api/auth";
 import HeroBanner from "@/components/HeroBanner";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 const BG_TYPES = [
   { id: "gradient_anim",   label: "تدرج متحرك",       icon: "🌈" },
@@ -282,8 +281,8 @@ export default function DevBackground() {
               {st.bgUrl && (
                 <div className="relative rounded-xl overflow-hidden border border-border">
                   {isVideo
-                    ? <video src={st.bgUrl} className="w-full h-40 object-cover" muted />
-                    : <img src={st.bgUrl} className="w-full h-40 object-cover" alt="preview" />}
+                    ? <video src={resolveMediaUrl(st.bgUrl)} className="w-full h-40 object-cover" muted />
+                    : <img src={resolveMediaUrl(st.bgUrl)} className="w-full h-40 object-cover" alt="preview" />}
                   <button onClick={() => update({ bgUrl: "" })}
                     className="absolute top-2 left-2 bg-destructive text-white rounded-full p-1.5 shadow">
                     <Trash2 className="w-3.5 h-3.5" />
@@ -327,7 +326,7 @@ export default function DevBackground() {
               <div className="grid grid-cols-3 gap-2">
                 {st.slideUrls.map((url, i) => (
                   <div key={i} className="relative group rounded-xl overflow-hidden border border-border">
-                    <img src={url} className="w-full h-24 object-cover" alt={`slide ${i + 1}`} />
+                    <img src={resolveMediaUrl(url)} className="w-full h-24 object-cover" alt={`slide ${i + 1}`} />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
                     <button onClick={() => update({ slideUrls: st.slideUrls.filter((_, idx) => idx !== i) })}
                       className="absolute top-1 left-1 bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">

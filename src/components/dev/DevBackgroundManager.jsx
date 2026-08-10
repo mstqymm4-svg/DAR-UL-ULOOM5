@@ -15,10 +15,9 @@ import {
   ImageIcon, Sparkles, Globe, Star
 } from "lucide-react";
 import { getSetting, setSettings } from "@/lib/settingsStore";
-import { Entities } from "@/api/entities";
 import { UploadFile } from "@/api/integrations";
-import { Auth } from "@/api/auth";
 import HeroBanner from "@/components/HeroBanner";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 // ── Background types ──────────────────────────────────────────────────────────
 const BG_TYPES = [
@@ -235,13 +234,13 @@ export default function DevBackgroundManager() {
             {isSlide ? (
               <div className="grid grid-cols-3 gap-1 p-3">
                 {st.slideUrls.map((url, i) => (
-                  <img key={i} src={url} alt="" className="w-full h-20 object-cover rounded-lg" />
+                  <img key={i} src={resolveMediaUrl(url)} alt="" className="w-full h-20 object-cover rounded-lg" />
                 ))}
               </div>
             ) : isVideo ? (
-              <video src={st.bgUrl} className="w-full h-48 object-cover" muted loop autoPlay playsInline />
+              <video src={resolveMediaUrl(st.bgUrl)} className="w-full h-48 object-cover" muted loop autoPlay playsInline />
             ) : (
-              <img src={st.bgUrl} alt="background" className="w-full h-48 object-cover" />
+              <img src={resolveMediaUrl(st.bgUrl)} alt="background" className="w-full h-48 object-cover" />
             )}
           </div>
         )}
@@ -354,8 +353,8 @@ export default function DevBackgroundManager() {
             {st.bgUrl && (
               <div className="relative rounded-xl overflow-hidden border border-border group">
                 {isVideo
-                  ? <video src={st.bgUrl} className="w-full h-40 object-cover" muted loop autoPlay playsInline />
-                  : <img src={st.bgUrl} className="w-full h-40 object-cover" alt="preview" />}
+                  ? <video src={resolveMediaUrl(st.bgUrl)} className="w-full h-40 object-cover" muted loop autoPlay playsInline />
+                  : <img src={resolveMediaUrl(st.bgUrl)} className="w-full h-40 object-cover" alt="preview" />}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
                 <button onClick={() => update({ bgUrl: "" })}
                   className="absolute top-2 left-2 bg-destructive text-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
@@ -409,7 +408,7 @@ export default function DevBackgroundManager() {
             <div className="grid grid-cols-3 gap-2">
               {st.slideUrls.map((url, i) => (
                 <div key={i} className="relative group rounded-xl overflow-hidden border border-border">
-                  <img src={url} className="w-full h-24 object-cover" alt="" />
+                  <img src={resolveMediaUrl(url)} className="w-full h-24 object-cover" alt="" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
                   <button onClick={() => update({ slideUrls: st.slideUrls.filter((_, idx) => idx !== i) })}
                     className="absolute top-1 left-1 bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">

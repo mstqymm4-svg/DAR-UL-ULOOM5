@@ -1,4 +1,5 @@
 import { getToken } from "@/api/apiClient";
+import { API_BASE } from "@/lib/mediaUrl";
 
 /**
  * Uploads a file to our local Express/Multer backend with real-time
@@ -49,7 +50,7 @@ export function uploadFileWithProgress(file, onProgress, kind) {
     xhr.addEventListener("error", () => reject(new Error("Network error during upload")));
     xhr.addEventListener("abort", () => reject(new Error("Upload cancelled")));
 
-    xhr.open("POST", endpoint);
+    xhr.open("POST", `${API_BASE}${endpoint}`);
 
     const token = getToken();
     if (token) {

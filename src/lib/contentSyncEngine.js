@@ -12,6 +12,7 @@
 
 import { Entities } from "@/api/entities";
 import * as db from "@/lib/offlineDB";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -51,13 +52,14 @@ async function cacheNewImages(urls) {
   let cached = 0;
   for (const url of urls) {
     if (!url) continue;
-    const existing = await db.getCachedImage(url);
+    const resolved = resolveMediaUrl(url);
+    const existing = await db.getCachedImage(resolved);
     if (existing) continue;
     try {
-      const res = await fetch(url);
+      const res = await fetch(resolved);
       if (res.ok) {
         const blob = await res.blob();
-        await db.cacheImage(url, blob);
+        await db.cacheImage(resolved, blob);
         cached++;
       }
     } catch (e) { /* skip failed image */ }

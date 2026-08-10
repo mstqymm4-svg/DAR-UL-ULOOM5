@@ -5,6 +5,7 @@
  */
 import * as pdfjsLib from "pdfjs-dist";
 import { getCachedPdf, cachePdf } from "@/lib/offlineDB";
+import { resolveMediaUrl } from "@/lib/mediaUrl";
 
 pdfjsLib.GlobalWorkerOptions.workerPort = new Worker(
   new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url),
@@ -23,11 +24,14 @@ const MAX_PAGE_CACHE = 12;
  * Offline-aware: uses IndexedDB cache when offline, URL when online.
  */
 export async function loadPdfDocument(url, metadata = {}) {
-  if (_docCache.has(url)) return _docCache.get(url);
+  // Resolve the relative /uploads/... path against the API origin (Android)
+  // so cache keys and PDF.js fetches all agree on one absolute URL.
+  const resolvedUrl = resolveMediaUrl(url);
+  if (_docCache.has(resolvedUrl)) return _docCache.get(resolvedUrl);
 
   // Check cache first (works both online and offline)
   try {
-    const cachedPdf = await getCachedPdf(url);
+    const cachedPdf = await getCachedPdf(resolvedUrl);
     if (cachedPdf && cachedPdf.buffer) {
       const pdfData = new Uint8Array(cachedPdf.buffer);
       const loadingTask = pdfjsLib.getDocument({
@@ -39,14 +43,14 @@ export async function loadPdfDocument(url, metadata = {}) {
         standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/",
       });
       const pdf = await loadingTask.promise;
-      _docCache.set(url, pdf);
+      _docCache.set(resolvedUrl, pdf);
       return pdf;
     }
   } catch(e) { /* fall through to URL */ }
 
   // Load from URL (online)
   const loadingTask = pdfjsLib.getDocument({
-    url,
+    url: resolvedUrl,
     rangeChunkSize: 262144,
     disableAutoFetch: false,
     disableStream: false,
@@ -57,12 +61,12 @@ export async function loadPdfDocument(url, metadata = {}) {
     standardFontDataUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/standard_fonts/",
   });
   const pdf = await loadingTask.promise;
-  _docCache.set(url, pdf);
+  _docCache.set(resolvedUrl, pdf);
 
   // Auto-cache PDF in background for offline reading (no duplicate download — uses pdfjs internal data)
   if (metadata.bookId) {
     pdf.getData().then(data => {
-      cachePdf(url, data.buffer, metadata.bookId, metadata.title || "").catch(() => {});
+      cachePdf(resolvedUrl, data.buffer, metadata.bookId, metadata.title || "").catch(() => {});
     }).catch(() => {});
   }
 
